@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { RepositoryPicker } from "@/features/integrations/RepositoryPicker";
 import {
   fetchGitHubRepositories,
   fetchGitHubStatus,
@@ -88,6 +89,14 @@ export function IntegrationsPage() {
   });
 
   const integration = statusQuery.data?.integration;
+  const savedRepository = useMemo(() => {
+    if (integration?.selectedOwner && integration?.selectedRepo) {
+      return `${integration.selectedOwner}/${integration.selectedRepo}`;
+    }
+
+    return "";
+  }, [integration?.selectedOwner, integration?.selectedRepo]);
+  const hasUnsavedRepositoryChange = selectedRepository !== savedRepository;
   const canManage = useMemo(() => {
     const organization = organizations.find((item) => item.id === selectedOrganizationId);
     return organization?.role === "owner" || organization?.role === "admin";
@@ -176,27 +185,23 @@ export function IntegrationsPage() {
                 <label className="block text-sm font-medium text-slate-600" htmlFor="repository">
                   Target repository
                 </label>
-                <select
-                  id="repository"
-                  className="field-input"
+                <RepositoryPicker
+                  repositories={repositoriesQuery.data ?? []}
                   value={selectedRepository}
                   disabled={!canManage || saveRepositoryMutation.isPending}
-                  onChange={(event) => setSelectedRepository(event.target.value)}
-                >
-                  <option value="">Select a repository</option>
-                  {(repositoriesQuery.data ?? []).map((repository) => (
-                    <option key={repository.fullName} value={repository.fullName}>
-                      {repository.fullName}
-                      {repository.private ? " (private)" : ""}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(repository) => {
+                    setSelectedRepository(repository);
+                    setSaveMessage(null);
+                    setConnectError(null);
+                  }}
+                />
 
                 {canManage ? (
                   <Button
                     variant="secondary"
                     disabled={
                       !selectedRepository ||
+                      !hasUnsavedRepositoryChange ||
                       saveRepositoryMutation.isPending ||
                       repositoriesQuery.isLoading
                     }

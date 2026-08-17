@@ -1,0 +1,16 @@
+{
+  "name": "@devpulse/dummy-api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Dummy Node API to test @devpulse/sdk error capture",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@devpulse/sdk": "file:../../sdk"
+  }
+}
