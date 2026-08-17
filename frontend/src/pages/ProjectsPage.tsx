@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Input } from "@/components/ui/input";
 import {
   createProject,
@@ -21,6 +22,8 @@ export function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (organizations.length > 0 && !organizationId) {
@@ -69,8 +72,18 @@ export function ProjectsPage() {
       return;
     }
 
-    await deleteProject(projectId);
-    setProjects((current) => current.filter((project) => project.id !== projectId));
+    setDeleting(true);
+    setError(null);
+
+    try {
+      await deleteProject(projectId);
+      setProjects((current) => current.filter((project) => project.id !== projectId));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to delete project");
+      throw caught;
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -150,7 +163,7 @@ export function ProjectsPage() {
                   >
                     Open onboarding
                   </Link>
-                  <Button variant="danger" onClick={() => void handleDelete(project.id)}>
+                  <Button variant="danger" onClick={() => setProjectToDelete(project)}>
                     Delete
                   </Button>
                 </div>
@@ -159,6 +172,27 @@ export function ProjectsPage() {
           </ul>
         )}
       </Card>
+
+      <ConfirmDeleteDialog
+        open={Boolean(projectToDelete)}
+        onOpenChange={(open) => {
+          if (!open && !deleting) {
+            setProjectToDelete(null);
+          }
+        }}
+        title="Delete project?"
+        description={
+          projectToDelete
+            ? `This will permanently delete "${projectToDelete.name}" and its API keys. This action cannot be undone.`
+            : ""
+        }
+        loading={deleting}
+        onConfirm={async () => {
+          if (projectToDelete) {
+            await handleDelete(projectToDelete.id);
+          }
+        }}
+      />
     </div>
   );
 }

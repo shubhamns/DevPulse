@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CodeBlock } from "@/components/CodeBlock";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { CopyButton } from "@/components/CopyButton";
 import {
   createProjectApiKey,
@@ -45,6 +46,8 @@ export function ProjectDetailPage() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [testMessage, setTestMessage] = useState<string | null>(null);
+  const [apiKeyToRevoke, setApiKeyToRevoke] = useState<ApiKey | null>(null);
+  const [revoking, setRevoking] = useState(false);
 
   useEffect(() => {
     if (!token || !id) {
@@ -110,11 +113,21 @@ export function ProjectDetailPage() {
       return;
     }
 
-    await revokeApiKey(apiKeyId);
-    setApiKeys((current) => current.filter((key) => key.id !== apiKeyId));
+    setRevoking(true);
+    setError(null);
 
-    if (revealedKey?.id === apiKeyId) {
-      setRevealedKey(null);
+    try {
+      await revokeApiKey(apiKeyId);
+      setApiKeys((current) => current.filter((key) => key.id !== apiKeyId));
+
+      if (revealedKey?.id === apiKeyId) {
+        setRevealedKey(null);
+      }
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to revoke API key");
+      throw caught;
+    } finally {
+      setRevoking(false);
     }
   }
 
@@ -251,7 +264,7 @@ export function ProjectDetailPage() {
                   <p className="font-medium text-slate-950">{apiKey.label}</p>
                   <p className="font-mono text-sm text-slate-500">{apiKey.maskedKey}</p>
                 </div>
-                <Button variant="danger" onClick={() => void handleRevoke(apiKey.id)}>
+                <Button variant="danger" onClick={() => setApiKeyToRevoke(apiKey)}>
                   Revoke
                 </Button>
               </li>
@@ -274,6 +287,28 @@ export function ProjectDetailPage() {
         </div>
         {testMessage ? <p className="mt-4 text-sm text-slate-600">{testMessage}</p> : null}
       </Card>
+
+      <ConfirmDeleteDialog
+        open={Boolean(apiKeyToRevoke)}
+        onOpenChange={(open) => {
+          if (!open && !revoking) {
+            setApiKeyToRevoke(null);
+          }
+        }}
+        title="Revoke API key?"
+        description={
+          apiKeyToRevoke
+            ? `This will revoke "${apiKeyToRevoke.label}" (${apiKeyToRevoke.maskedKey}). Applications using this key will stop sending events.`
+            : ""
+        }
+        confirmLabel="Revoke"
+        loading={revoking}
+        onConfirm={async () => {
+          if (apiKeyToRevoke) {
+            await handleRevoke(apiKeyToRevoke.id);
+          }
+        }}
+      />
     </div>
   );
 }

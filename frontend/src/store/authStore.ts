@@ -9,6 +9,7 @@ import {
   onAuthSessionCleared,
   onAuthSessionPersisted,
 } from "@/lib/auth";
+import { queryClient } from "@/lib/queryClient";
 import type { MeResponse, User } from "@/types/auth";
 
 type AuthState = {
@@ -74,6 +75,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
 
     try {
       await registerUser(input);
+      queryClient.clear();
       const session = await loadSession();
       set({
         ...session,
@@ -92,6 +94,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
 
     try {
       await loginUser(input);
+      queryClient.clear();
       const session = await loadSession();
       set({
         ...session,
@@ -114,6 +117,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
       // Local session is still cleared below.
     } finally {
       clearAuthSession();
+      queryClient.clear();
       set({
         token: null,
         user: null,
@@ -133,6 +137,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
 }));
 
 onAuthSessionCleared(() => {
+  queryClient.clear();
   useAuthStore.setState({
     token: null,
     user: null,
