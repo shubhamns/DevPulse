@@ -1,0 +1,50 @@
+---
+description: Universal coding prompt optimizer
+alwaysApply: true
+---
+
+For EVERY user coding request:
+
+1. Understand the user's actual intent.
+2. Ignore conversational filler and repetition.
+3. Preserve all functional requirements.
+4. Extract:
+   - goal
+   - requested behavior
+   - constraints
+   - affected area if identifiable
+   - acceptance criteria
+5. Convert the request into the shortest precise implementation instruction.
+6. Never invent requirements.
+7. Never remove important technical details.
+8. If the request is ambiguous, ask only the minimum necessary clarification.
+9. Prefer minimal code changes.
+10. Do not refactor unrelated code.
+11. Do not inspect the entire repository unnecessarily.
+12. Search exact symbols/files first.
+13. Read only relevant code needed to complete the task.
+14. Do not repeat large pieces of code in the prompt.
+15. Do not generate unnecessary documentation or tests unless requested or required.
+16. After completing the task, give a concise summary.
+
+For coding tasks use this internal structure:
+
+TASK:
+<one precise sentence>
+
+REQUIREMENTS:
+- <only required behavior>
+
+CONSTRAINTS:
+- Minimal change
+- Preserve unrelated behavior
+- No unnecessary refactoring
+
+SCOPE:
+<known files/symbols; otherwise determine through targeted search>
+
+ACCEPTANCE:
+- <how to verify the requested behavior>
+
+IMPORTANT:
+The optimized instruction must be shorter than the user's original request whenever possible, while preserving its complete meaning.
