@@ -4,6 +4,13 @@ AI-powered production error monitoring and debugging for developers.
 
 DevPulse is an AI-first incident-resolution platform. Teams install a lightweight JavaScript/TypeScript SDK, capture production errors, group duplicates with deterministic fingerprinting, and get root-cause analysis plus suggested fixes. GitHub issues can be created from DevPulse. This is not a Sentry clone.
 
+<img width="1470" height="747" alt="image" src="https://github.com/user-attachments/assets/a6ac79f0-59d6-494c-9634-d88bba65c7de" />
+<img width="1466" height="740" alt="image" src="https://github.com/user-attachments/assets/9b9ffd11-5d89-4ce5-a2de-9d7a802a2668" />
+<img width="1146" height="146" alt="image" src="https://github.com/user-attachments/assets/3e0da0fa-865b-4381-a7fc-67cdb2bfa677" />
+
+
+
+
 ## Repository layout
 
 Each package owns its own `node_modules` and `package-lock.json`. There is no npm workspace hoist.
